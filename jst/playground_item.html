@@ -1,0 +1,32 @@
+<li id="playground-<%= letter %>">
+    <div class="result-letter">
+        <strong><%= letter.toUpperCase() %></strong>
+    </div>
+    <div class="result-text">
+        <a href="<%= S3_BASE_URL %>/playground/<%= data.slug[0] %>.html">
+            <%= data.display_name[0] %>
+        </a>
+        
+        <span class="result-features">
+        <% if (features.length > 0) { %>
+            <strong>Features:</strong>
+
+            <% for (i = 0; i < features.length; i++) { %>
+                <%= features[i].term.toLowerCase() %><% if (i < (features.length - 1)) { %>, <% } %>
+            <% } %>
+        <% } else { %>
+            <i class="icon-question-sign"></i>&nbsp;Help us identify accessible features at this playground.
+        <% } %>
+        </span>
+    </div>
+    <div class="result-meta">
+        <span class="result-distance">
+            <% if (data.distance && data.latitude.length > 0) { %>
+                 <%= (data.distance[0] / 1000).toFixed(1) %> miles
+            <% } %>
+        </span>
+        <span class="result-city">
+            <% if (data.city[0]) { %><%= data.city[0] %>, <% } %><%= data.state[0] %>
+        </span>
+    </div>
+</li>

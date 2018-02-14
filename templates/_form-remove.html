@@ -1,0 +1,18 @@
+<form id="remove-form" class="row-fluid" method="post" enctype="multipart/form-data" action="{{ SERVER_BASE_URL }}/request-delete-playground/">
+    <div class="modal-body">
+        <h2>{{ COPY.content.form_remove_title }}</h2>
+        <p class="muted">{{ COPY.content.form_remove_description }}</p>
+        <input style="display:none" name="slug" value="{{ playground.slug }}"></input>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-large" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="playground-update" class="btn btn-large btn-success">Save</button>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(function() {
+        // Append with JS to hopefully quiet spambots
+        $('#remove-form .modal-body').append('<textarea name="text"></textarea>');    
+    });
+</script>

@@ -1,0 +1,221 @@
+{% extends '_base.html' %}
+
+{% block page_title %}{{ playground.display_name }} | {% endblock page_title %}
+
+{% block body_class %}playground{% endblock body_class %}
+
+{% block extra_css %}
+    {{ CSS.push('css/mapbox.css') }}
+{% endblock %}
+
+{% block social_head %}
+    {# Twitter #}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@nprapps">
+    <meta name="twitter:image" content="{{ TWITTER.IMAGE_URL }}" />
+
+    {# Facebook #}
+    <meta property="og:title" content="{{ FACEBOOK.TITLE }}: {{ playground.display_name }} : NPR" />
+    <meta property="og:url" content="{{ S3_BASE_URL }}{{ path }}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:description" content="{% if playground.public_remarks %}{{ playground.public_remarks }}{% else %}{{ FACEBOOK.DESCRIPTION }}{% endif %}" />
+    <meta property="og:image" content="{{ FACEBOOK.IMAGE_URL }}" />
+    <meta property="og:site_name" content="NPR.org" />
+    <meta property="fb:app_id" content="{{ FACEBOOK.APP_ID }}" />
+
+    {# Google News #}
+    <meta name="thumbnail" content="{{ GOOGLE.IMAGE_URL }}" />
+{% endblock social_head %}
+
+{% block extra_head %}
+    <meta name="description" content="{% if playground.public_remarks %}{{ playground.public_remarks }}{% else %}{{ PROJECT_DESCRIPTION }}{% endif %}">
+{% endblock %}
+
+{% block header_content %}
+{% include '_nav-interior.html' %}
+{% include '_alerts.html' %}
+
+<div class="container">
+    <div class="row">
+        <h1 class="playground-name span-12">{{ playground.display_name }}</h1>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+{% if not features %}
+<div class="help-prompt help-prompt-features">
+    <p class="prompt"><i class="icon icon-warning-sign"></i>{{ COPY.content.playground_help_key_features }}</p>
+    <a href="#edit-playground" role="button" class="btn btn-blue btn-block btn-edit" data-toggle="modal"><i class="icon-pencil"></i> {{ COPY.content.playground_help_button }}</a>
+</div>
+{% endif %}
+
+<!-- Map / Address -->
+<div class="address">
+    {% if playground.latitude and playground.longitude %}
+    <img id="locator-map" data-longitude="{{ playground.longitude }}" data-latitude="{{ playground.latitude }}" alt="{{ playground.display_name }} : {{ playground.address }}, {{ playground.city }}, {{ playground.state }} {{ playground.zip_code }}" />
+    {% endif %}
+    <div class="address-meta-wrapper">
+        <div class="address-meta">
+            <p>
+            {% if playground.address %}{{ playground.address }}{% if playground.address_approximate %} (approximate){% endif %}, {% endif %}
+            {% if playground.city %}{{ playground.city }}, {% endif %}
+            {% if playground.state %}{{ playground.state }} {% endif %}
+            {% if playground.zip_code %}{{ playground.zip_code }}{% endif %}
+            {% if playground.url %}<br /><a href="{% if playground.url[:4] != 'http' %}http://{% endif %}{{ playground.url }}">Website</a>{% endif %}
+            </p>
+        </div>
+
+        <!-- Directions -->
+        <div class="directions-wrapper">
+            {#
+            {% if playground.address_approximate and playground.latitude and playground.longitude %}
+            <p><a href="https://maps.google.com/maps?saddr=&daddr={{ playground.latitude }},{{ playground.longitude }}&z=16" target="_blank" class="btn btn-blue" data-ios-map="http://maps.apple.com/?daddr={{ playground.latitude }},{{ playground.longitude }}" data-ios-gmap="comgooglemaps://?daddr={{ playground.latitude }},{{ playground.longitude }}&views=traffic">Get Directions</a></p>
+            {% elif playground.address %}
+            <p><a id="directions-link" href="https://maps.google.com/maps?saddr=&daddr={{ playground.address }}+{{ playground.city }}+{{ playground.state }}+{{ playground.zip }}&z=16" target="_blank" class="btn btn-blue" data-ios-map="http://maps.apple.com/?daddr={{ playground.latitude }},{{ playground.longitude }}" data-ios-gmap="comgooglemaps://?daddr={{ playground.latitude }},{{ playground.longitude }}&views=traffic"><i class="icon-road"></i> Get Directions</a></p>
+            {% endif %}
+            #}
+            <p class="directions"><a id="directions-link" href="https://maps.google.com/maps?saddr=&daddr={{ playground.latitude }},{{ playground.longitude }}&z=16" target="_blank" class="btn btn-blue" data-ios-map="http://maps.apple.com/?daddr={{ playground.latitude }},{{ playground.longitude }}" data-ios-gmap="comgooglemaps://?daddr={{ playground.latitude }},{{ playground.longitude }}&views=traffic"><i class="icon-road"></i> Get Directions</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- Categories / key features -->
+<div class="playground-features">
+    <h4>About This Playground</h4>
+
+    {% if playground.public_remarks %}
+    <p class="description">{{ playground.public_remarks }}</p>
+    {% endif %}
+
+    {% if playground.features %}
+    <ul class="playground-feature-list">{% for feature in playground.features %}
+        <li>
+            <img src="{{ S3_BASE_URL }}{{ feature.copy['photo_thumb'] }}" alt="{{ feature.copy['term'] }}" />
+            <div class="feature-definition">
+                <strong>{{ feature.copy['term'] }}</strong>
+                {{ feature.copy['definition_short'] }}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h5 class="meta" aria-label="{{ COPY.content.ARIA_more_info }}">More Info</h5>
+    <ul class="meta" role="menu">
+        <li class="agency" role="menuitem">
+            <strong>Agency:</strong>
+            {% if playground.agency %}
+                {{ playground.agency }}
+                {% if playground.agencytype %} ({{ playground.agencytype }}){% endif %}
+            {% else %}
+                Unavailable
+            {% endif %}
+        </li>
+        <li class="owner">
+            <strong>Owner:</strong>
+            {% if playground.owner %}
+                {{ playground.owner }}
+                {% if playground.owner_type %} ({{ playground.owner_type }}){% endif %}
+            {% else %}
+                Unavailable
+            {% endif %}
+        </li>
+    </ul>
+
+    <!-- Share buttons -->
+    <ul class="social">
+        <li class="facebook"><a rel="external" href="https://www.facebook.com/dialog/feed?app_id={{ FACEBOOK.APP_ID }}&amp;link={{ S3_BASE_URL }}{{ path }}&amp;name={{ PROJECT_NAME }}%3A+{{ playground.display_name }}&amp;picture={{ FACEBOOK.IMAGE_URL }}&amp;description={% if playground.public_remarks %}{{ playground.public_remarks|urlencode }}{% else %}{{ FACEBOOK.DESCRIPTION|urlencode }}{% endif %}&amp;redirect_uri={{ FACEBOOK.URL|urlencode }}" alt="Share on Facebook" target="_blank" onclick="_gaq.push(['_trackEvent', 'Social', 'Share Page On Facebook', '{{ PROJECT_NAME }}']);"><i class="icon-facebook"></i> <span>Like This On Facebook</span><b>Share This</b></a></li>
+        <li class="twitter"><a rel="external" href="http://twitter.com/share?text={{ PROJECT_NAME }}%3A+{{ playground.display_name }}&amp;url={{ S3_BASE_URL }}{{ path }}" alt="Share on Twitter" target="_blank" onclick="_gaq.push(['_trackEvent', 'Social', 'Share Page On Twitter', '{{ PROJECT_NAME }}']);"><i class="icon-twitter"></i> <span>Share This On Twitter</span><b>Tweet This</b></a></li>
+    </ul>
+</div>
+
+
+{% if playground.nearby(1)|length > 0 %}
+<!-- nearby parks -->
+<div class="nearby">
+    <h4>{{ COPY.content.playground_nearby_title }}</h4>
+    <ul class="playground-list nearby">
+        {% for nearby in playground.nearby(3) %}
+        <li>
+            <div class="result-text">
+                <a href="{{ S3_BASE_URL }}{{ url_for('_playground', playground_slug=nearby.slug) }}">
+                    {{ nearby.display_name }}
+                </a>
+                <span class="result-city">
+                    {% if nearby.city %}{{ nearby.city }}, {% endif %}{{ nearby.state }}
+                </span>
+            </div>
+            <div class="result-meta">
+                <span class="result-distance">
+                    {{ nearby.distance|round(1) }} miles
+                </span>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="help-prompt">
+    <p class="prompt">{{ COPY.content.playground_help_title }}</p>
+    <p><a href="#edit-playground" class="btn btn-blue btn-block" data-toggle="modal" role="button"><i class="icon-pencil"></i> {{ COPY.content.playground_help_button }}</a></p>
+</div>
+
+{% if revisions.count() > 0 %}
+<div class="changelog" aria-label="{{ COPY.content.ARIA_changelog }}" role="menu">
+    <h5 class="meta">Changelog</h5>
+    <ul class="meta">
+        {% for revision in revisions %}
+        <li>
+            <span class="timestamp">{{ revision.get_est_time_formatted() }}</span>
+            <ul>
+                {% if revision.action == 'update' %}
+                    {% for change in revision.get_log() %}
+                        {% if display_field_name(change.field) != 'Reverse Geocoded' %}
+                        <li role="menuitem">
+                        <strong>{{ display_field_name(change.field) }}</strong> {% if change.from == 0 and change.to == 1 %}selected{% elif change.from == 1 and change.to == 0 %}deselected{% elif not change.from %}set to <em>{{ change.to }}</em>{% elif not change.to %}unset from <em>{{ change.from }}</em>{% else %}changed from <em>{{ change.from }}</em> to <em>{{ change.to }}</em>{% endif %}.
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                {% elif revision.action == 'insert' %}
+                    <li role="menuitem">Playground created.</li>
+                {% endif %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<p class="removal">Is this listing inappropriate? <a href="#remove-playground" role="button" data-toggle="modal">Suggest this playground for removal.</a></p>
+
+
+<!-- update form -->
+<div id="edit-playground" class="update-form-modal modal hide fade">
+	{% include "_form.html" %}
+</div>
+
+<!-- update form -->
+<div id="remove-playground" class="remove-form-modal modal hide fade">
+	{% include "_form-remove.html" %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block extra_foot_js %}
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+    {{ JS.push('js/lib/underscore.js') }}
+    {{ JS.push('js/lib/moment.js') }}
+    {{ JS.push('js/lib/bootstrap.js') }}
+    {{ JS.push('js/templates.js') }}
+    {{ JS.push('js/utils.js') }}
+    {{ JS.push('js/form.js') }}
+    {{ JS.push('js/lookup_tables.js') }}
+    {{ JS.render('js/app-playground-footer.min.js') }}
+{% endblock extra_foot_js %}

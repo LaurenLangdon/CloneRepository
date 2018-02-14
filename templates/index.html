@@ -1,0 +1,77 @@
+{% extends '_base.html' %}
+
+{% block extra_head %}
+    <meta name="description" content="{{ PROJECT_DESCRIPTION }}">
+{% endblock %}
+
+{% block body_class %}index{% endblock body_class %}
+
+{% block extra_css %}
+    {{ CSS.push('css/mapbox.css') }}
+{% endblock %}
+
+{% block header_content %}
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="span12 title-banner">
+                <a href="http://npr.org"><img class="logo" src="http://media.npr.org/chrome/news/nprlogo_138x46.gif" alt="NPR" /></a>
+                <h1>Playgrounds For Everyone</h1>
+                <h2>{{ COPY.content.app_description_1 }} {# {{ playground_count }}{{ COPY.content.app_description_2 }}#}</h2>
+            </div>
+        </div>
+    </div>
+    {% include '_search_form.html' %}
+</header>
+
+<div class="poster-wrapper">
+    <div class="intro-poster"></div>
+
+    <div class="container">
+        <div class="row">
+            <div class="span5 project-info-wrapper">
+                <div id="playground-help" class="project-info">
+                    <h3 class="feature-title">{{ COPY.content.help_title }}</h3>
+                   <p><a href="add-search.html" class="btn btn-blue btn-lg btn-block" role="button"><i class="icon-plus-sign"></i> {{ COPY.content.search_help_button }}</a></p>
+                   <p class="share-bulk">{{ COPY.content.help_add_many }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include '_alerts.html' %}
+{% endblock %}
+
+
+{% block content %}
+<div id="playground-important">
+
+</div>
+
+
+
+<div id="playground-data" class="help-prompt">
+    <h3 class="data-title">{{ COPY.content.data_title }}</h3>
+    <p class="data-description">{{ COPY.content.data_description }}</p>
+    <a href="{{ COPY.content.data_link_csv }}" class="btn btn-blue data-download">{{ COPY.content.data_link_csv_text }}</a>
+    <a href="{{ COPY.content.data_link_json }}" class="btn btn-blue data-download">{{ COPY.content.data_link_json_text }}</a>
+</div>
+
+
+<div id="playground-meta">
+    <h3>Credits And Thanks</h3>
+    {{ COPY.attribution.byline }}
+</div>
+
+{% endblock %}
+
+
+{% block extra_foot_js %}
+    {{ JS.push('js/lib/underscore.js') }}
+    {{ JS.push('js/lib/moment.js') }}
+    {{ JS.push('js/lib/bootstrap.js') }}
+    {{ JS.push('js/templates.js') }}
+    {{ JS.push('js/utils.js') }}
+    {{ JS.push('js/index.js') }}
+    {{ JS.render('js/app-index-footer.min.js') }}
+{% endblock %}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{{ PROJECT_NAME }} : NPR</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <base target="_top" />
+
+    {{ CSS.push('less/widget.less') }}
+    {{ CSS.render('css/widget.min.css') }}
+
+    {{ JS.push('js/app_config.js') }}
+    {{ JS.push('js/console.js') }}
+    {{ JS.push('js/lib/underscore.js') }}
+    {{ JS.push('js/lib/jquery-1.8.3.js') }}
+    {{ JS.push('js/lib/modernizr.js') }}
+    {{ JS.render('js/widget-header.min.js') }}
+</head>
+<body>
+    <section id="playground-feature-primer">
+        <h2>{{ COPY.content.widget_feature_title }}</h2>
+        <h3>{{ COPY.content.widget_feature_description }}</h3>
+
+        <nav>
+            <button id="btn-back">Back</button>
+            <button id="btn-next">Next</button>
+            <div class="counter"><span>1</span> of <span>10</span></div>
+        </nav>
+        <div id="slideshow">
+            <div class="slide-wrapper">
+                {% for row in COPY.feature_list %}
+                <div class="slide" id="slide-{{ loop.index0 }}">
+                    <img src="{{ S3_BASE_URL }}{{ row.photo }}" alt="{{ row.term }}" />
+                    <p><strong>{{ row.term }}:</strong> {{ row.definition }}</p>
+                    <p class="photo-credit">{{ row.photo_credit }}</p>
+                </div>
+                {% endfor %}
+                <div class="slide help">
+                    <h3>{{ COPY.content.widget_help_title }}</h3>
+                    <ol>
+                        <li>
+                            <p>
+                                <strong>1</strong>
+                                {{ COPY.content.help_step_one }}
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                <strong>2</strong>
+                                {{ COPY.content.help_step_two }}
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                <strong>3</strong>
+                                {{ COPY.content.help_step_three }}
+                            </p>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="playground-search">
+        <h2>{{ COPY.content.widget_search_title }}</h2>
+        <form id="search">
+            <button type="button" id="geolocate" class="btn btn-blue btn-block"><i class="icon-screenshot"></i> Nearby</button>
+            <div class="divider">OR</div>
+            <div id="address-search">
+                <input type="text" name="address" placeholder="Address, City/State or ZIP" class="address-search-input" id="zip-code" />
+
+                <button type="submit" id="search-btn" class="btn btn-blue btn-block" aria-label="Search"><i class="icon-search"></i><span>Search</span></button>
+            </div>
+            <p class="example">
+                For example,
+                <a href="search.html#address=600+Central+Street,+Evanston,+Cook,+Illinois,+60201&latitude=42.063957&longitude=-87.677219&zoom={{ RESULTS_DEFAULT_ZOOM }}&nearby=false" class="search-example" target="_top">600 Central St, Evanston, IL</a> or
+                <a href="search.html#address=New+York+City,+New+York&latitude=40.7305991&longitude=-73.9865812&zoom={{ RESULTS_DEFAULT_ZOOM }}&nearby=false" class="search-example" target="_top">New York, NY</a> or
+                <a href="search.html#address=Lubbock,+Lubbock+County,+Texas,+79410&latitude=33.5687784855597&longitude=-101.890442782044&zoom={{ RESULTS_DEFAULT_ZOOM }}&nearby=false" class="search-example" target="_top">79410</a>
+            </p>
+        </form>
+    </section>
+
+    <footer>
+        <h1><b></b><a href="{{ S3_BASE_URL }}">{{ COPY.content.widget_title }}</a></h1>
+    </footer>
+
+    {{ JS.push('js/lib/jquery.smooth-scroll.js') }}
+    {{ JS.push('js/widget.js') }}
+    {{ JS.render('js/widget-footer.min.js') }}
+</body>
+</html>

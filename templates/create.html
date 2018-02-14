@@ -1,0 +1,262 @@
+{% extends '_base.html' %}
+
+{% block extra_head %}
+    <meta name="description" content="{{ PROJECT_DESCRIPTION }}">
+{% endblock %}
+
+{% block body_class %}playground create-playground{% endblock body_class %}
+
+{% block extra_css %}
+    {{ CSS.push('css/mapbox.css') }}
+{% endblock %}
+
+{% block header_content %}
+{% include '_nav-interior.html' %}
+{% endblock %}
+
+{% block content %}
+
+<form id="form" class="row-fluid playground-form" method="post" enctype="multipart/form-data" action="{{ SERVER_BASE_URL }}/insert-playground/">
+<div class="">
+
+    <h2>{{ COPY.content.create_title }}</h2>
+    <p class="muted">Changes will be submitted for review and posted within 24 hours.</p>
+
+    <h5 class="address-label">Address
+    </h5>
+    <div id="address-placeholder">
+        <img id="locator-map" class="hidden" data-longitude="" data-latitude="" />
+        <a id="toggle-address-button" data-action="toggle_address_editor" class="btn btn-success btn-large" role="button">Edit</a>
+        <div class="address-meta">
+            <p></p>
+        </div>
+    </div>
+    {#<div class="features span6">
+        <h5>Features</h5>
+
+        {% for feature in features %}
+        <div class="feature">
+            {{ feature|safe }}
+        </div>
+        {% endfor %}
+
+
+    </div>#}
+    <div id="features-wrapper" class="fluid-row">
+        <div class="features span6">
+            <h5>Features</h5>
+
+            {% for feature in COPY.feature_list %}
+            <div class="feature control-group">
+                <img src="{{ S3_BASE_URL }}{{ feature['photo_thumb'] }}" alt="{{ feature['term'] }}" />
+                <input type="checkbox" role="checkbox" name="{{ feature['key'] }}" id="{{ feature['key'] }}"> <label for="{{ feature['key'] }}" class="checkbox"  aria-label="Click if the playground has {{ feature['term'] }}?">{{ feature['term'] }}</label>
+                <span class="help-block">{{ feature['definition_short'] }}</span>
+            </div>
+            {% endfor %}
+
+            <div class="alert">Don't see the feature you're looking for? <a href="mailto:playgrounds@npr.org?subject={{ PROJECT_NAME }}: Feedback">Email us</a>.</div>
+        </div>
+        <div class="basic-info span6">
+            <div class="control-group">
+                <label class="control-label" id="playground">Playground Name <span class="muted">(Optional)</span></label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="name" for="playground"></input>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" id="facility">At (is this in a park or school?) <span class="muted">(Optional)</span></label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="facility" value="" for="facility"></input>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" id="URL">URL <span class="muted">(Optional)</span></label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="url" value="" for="URL"></input>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" id="agency">Agency <span class="muted">(Optional)</span></label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="agency" value="" for="agency"></input>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" id="owner">Owner <span class="muted">(Optional)</span></label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="owner" value="" for="owner"></input>
+                </div>
+            </div>
+
+            <div class="control-group" style="display:none">
+                <label class="control-label">Remarks</label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="public_remarks" value=""></input>
+                </div>
+            </div>
+
+            <div class="control-group" style="display:none">
+                <label class="control-label">Id</label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="id" value="" data-changed="true"></input>
+                </div>
+            </div>
+
+            <div class="control-group" style="display:none">
+                <label class="control-label">Reverse Geocoded</label>
+                <div class="controls">
+                    <input type="checkbox" name="reverse_geocoded"></input>
+                </div>
+            </div>
+
+            <div class="control-group" style="display:none">
+                <label class="control-label">Latitude</label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="latitude" value=""></input>
+                </div>
+            </div>
+
+            <div class="control-group" style="display:none">
+                <label class="control-label">Longitude</label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="longitude" value=""></input>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="create-footer">
+    <button class="btn btn-large" onclick="javascript:window.history.back(); return false;" role="button">Cancel</button>
+    <button id="playground-update" class="btn btn-large btn-success" role="button">Save</button>
+</div>
+
+<div class="address-editor">
+    <h2 class="edit-address-hed">{{ COPY.content.create_title }}</h2>
+    <ul class="nav nav-tabs" id="editor-tabs">
+      <li class="active"><a href="#map-pane" data-toggle="tab">I don't know the exact address</a></li>
+      <li><a href="#address-pane" data-toggle="tab">I know the exact address</a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="map-pane" class="map-pane tab-pane active">
+            <div class="modal-alerts"></div>
+            <div class="edit-address-map">
+                <div id="edit-map">
+                    <div id="edit-marker" style="display:none;"></div>
+                    <a id="geolocate" data-action="locate_me" class="btn btn-large">
+                        <i class="icon-location-arrow"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="address-pane" class="address-pane tab-pane">
+            <div class="modal-alerts"></div>
+            <div class="control-group">
+                <label class="control-label" data-required="true" for="address">Address</label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="address" id="address" value=""></input>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" data-required="true" for="city">City</label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="city" id="city" value=""></input>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="state">State</label>
+                <div class="controls">
+                    <select class="span12" type="text" name="state" id="state" value="" data-required="true" role="menu" aria-haspopup="true">
+                        <option value="" role="menuitem"></option>
+                        <option value="AL" role="menuitem">AL</option>
+                        <option value="AK" role="menuitem">AK</option>
+                        <option value="AZ" role="menuitem">AZ</option>
+                        <option value="AR" role="menuitem">AR</option>
+                        <option value="CA" role="menuitem">CA</option>
+                        <option value="CO" role="menuitem">CO</option>
+                        <option value="CT" role="menuitem">CT</option>
+                        <option value="DE" role="menuitem">DE</option>
+                        <option value="DC" role="menuitem">DC</option>
+                        <option value="FL" role="menuitem">FL</option>
+                        <option value="GA" role="menuitem">GA</option>
+                        <option value="HI" role="menuitem">HI</option>
+                        <option value="ID" role="menuitem">ID</option>
+                        <option value="IL" role="menuitem">IL</option>
+                        <option value="IN" role="menuitem">IN</option>
+                        <option value="IA" role="menuitem">IA</option>
+                        <option value="KS" role="menuitem">KS</option>
+                        <option value="KY" role="menuitem">KY</option>
+                        <option value="LA" role="menuitem">LA</option>
+                        <option value="ME" role="menuitem">ME</option>
+                        <option value="MD" role="menuitem">MD</option>
+                        <option value="MA" role="menuitem">MA</option>
+                        <option value="MI" role="menuitem">MI</option>
+                        <option value="MN" role="menuitem">MN</option>
+                        <option value="MS" role="menuitem">MS</option>
+                        <option value="MO" role="menuitem">MO</option>
+                        <option value="MT" role="menuitem">MT</option>
+                        <option value="NE" role="menuitem">NE</option>
+                        <option value="NV" role="menuitem">NV</option>
+                        <option value="NH" role="menuitem">NH</option>
+                        <option value="NJ" role="menuitem">NJ</option>
+                        <option value="NM" role="menuitem">NM</option>
+                        <option value="NY" role="menuitem">NY</option>
+                        <option value="NC" role="menuitem">NC</option>
+                        <option value="ND" role="menuitem">ND</option>
+                        <option value="OH" role="menuitem">OH</option>
+                        <option value="OK" role="menuitem">OK</option>
+                        <option value="OR" role="menuitem">OR</option>
+                        <option value="PA" role="menuitem">PA</option>
+                        <option value="RI" role="menuitem">RI</option>
+                        <option value="SC" role="menuitem">SC</option>
+                        <option value="SD" role="menuitem">SD</option>
+                        <option value="TN" role="menuitem">TN</option>
+                        <option value="TX" role="menuitem">TX</option>
+                        <option value="UT" role="menuitem">UT</option>
+                        <option value="VT" role="menuitem">VT</option>
+                        <option value="VA" role="menuitem">VA</option>
+                        <option value="WA" role="menuitem">WA</option>
+                        <option value="WV" role="menuitem">WV</option>
+                        <option value="WI" role="menuitem">WI</option>
+                        <option value="WY" role="menuitem">WY</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="zip-code">Zip Code</label>
+                <div class="controls">
+                    <input class="input-block-level input" type="text" name="zip_code" value="" data-required="true" id="zip-code"></input>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="edit-address-footer">
+        <a id="accept-address" data-action="accept_address" class="btn btn-large btn-block btn-success" role="button">Next</a>
+    </div>
+</div>
+</form>
+<div class="modal-backdrop fade in"></div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block extra_foot_js %}
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    {{ JS.push('js/lib/underscore.js') }}
+    {{ JS.push('js/lib/moment.js') }}
+    {{ JS.push('js/lib/bootstrap.js') }}
+    {{ JS.push('js/templates.js') }}
+    {{ JS.push('js/utils.js') }}
+    {{ JS.push('js/form.js') }}
+    {{ JS.push('js/lookup_tables.js') }}
+    {{ JS.render('js/app-create-footer.min.js') }}
+{% endblock extra_foot_js %}
+
